@@ -938,9 +938,9 @@ int QCamera2HardwareInterface::close_camera_device(hw_device_t *hw_dev)
     }
     delete hw;
 
-    pthread_mutex_lock(&g_camlock);
+    pthread_mutex_lock(&gCamLock);
     mCameraSessionActive = 0;
-    pthread_mutex_unlock(&g_camlock);
+    pthread_mutex_unlock(&gCamLock);
     CDBG_HIGH("[KPI Perf] %s: X",__func__);
     return ret;
 }
@@ -1137,15 +1137,15 @@ int QCamera2HardwareInterface::openCamera(struct hw_device_t **hw_device)
     ATRACE_CALL();
     int rc = NO_ERROR;
 
-    pthread_mutex_lock(&g_camlock);
+    pthread_mutex_lock(&gCamLock);
     // if mCameraSessionActive is 1 then return EUSERS to indicate MAX_CAMERAS_IN_USE to APP
     // TODO: This needs to be replaced by checking SENSOR combination & Number of VFE's
     if (mCameraSessionActive) {
         ALOGE("%s: multiple simultaneous camera instance not supported", __func__);
-        pthread_mutex_unlock(&g_camlock);
+        pthread_mutex_unlock(&gCamLock);
         return -EUSERS;
     }
-    pthread_mutex_unlock(&g_camlock);
+    pthread_mutex_unlock(&gCamLock);
 
     if (mCameraOpened) {
         *hw_device = NULL;
@@ -1155,9 +1155,9 @@ int QCamera2HardwareInterface::openCamera(struct hw_device_t **hw_device)
     rc = openCamera();
     if (rc == NO_ERROR){
         *hw_device = &mCameraDevice.common;
-        pthread_mutex_lock(&g_camlock);
+        pthread_mutex_lock(&gCamLock);
         mCameraSessionActive = 1;
-        pthread_mutex_unlock(&g_camlock);
+        pthread_mutex_unlock(&gCamLock);
 /*
         if (m_thermalAdapter.init(this) != 0) {
           ALOGE("Init thermal adapter failed");
